@@ -13,3 +13,4 @@
 </ul>
 
 <p>Visualização</p>
+<p>https://projinteg-pi4-interface-main-s952pt.streamlit.app/</p>
