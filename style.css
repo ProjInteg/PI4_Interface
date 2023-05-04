@@ -1,0 +1,9 @@
+.stMarkdown {
+    text-align: center;
+}
+#MainMenu {
+    visibility: hidden;
+
+footer {
+    visibility: hidden;
+}
