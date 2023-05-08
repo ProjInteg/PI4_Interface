@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly_express as px
+import plotly.figure_factory as ff
 
 
 with open('style.css') as f:
@@ -52,17 +53,34 @@ def visualizer(base_dados: pd.DataFrame):
     st.header(":bar_chart: Taxa de Inadimplencia")
     st.markdown("#")
 
-    adimplentes = base_dados[base_dados['inadimplente'] == 0.0]
     inadimplentes = base_dados[base_dados['inadimplente'] == 1.0]
 
     populacao = base_dados['uf'].value_counts(normalize=True) * 100
-    inadimplencia = inadimplentes['uf'].value_counts(normalize=True) * 100
-
-    base_dados['%populacao'] = populacao
-    base_dados['%inadimplencia'] = inadimplencia
+    inadimplencia= inadimplentes['uf'].value_counts(normalize=True) * 100
 
 
+    base_by_ocup = base_dados.groupby('uf')
 
+    fig_pop_inad = px.bar(
+        base_dados,
+        x= inadimplencia,
+        y= populacao,
+        labels={'x':'% inadimplencia', 'y': '% populacao'},
+        color_discrete_sequence=["#f17b1b"]
+
+    )
+
+
+
+    fig_popul_inadim = ff.create_distplot(
+        [populacao, inadimplencia],
+        group_labels=['% população', '% inadimplencia']
+    )
+
+    #st.markdown(f":orange[{inadimplencia:,}]")
+
+    st.plotly_chart(fig_pop_inad)
+    st.plotly_chart(fig_popul_inadim)
     st.dataframe(base_dados)
 
 def main(dataframe):
@@ -70,7 +88,7 @@ def main(dataframe):
     # print("STATE HERE", filter_results)
     filter_pattern = clause(filter_res=filter_res)
     # print("FILTER PATTERN", filter_pattern)
-    df_selection = dataframe.equery(
+    df_selection = dataframe.query(
         expr=eval(filter_pattern),
         engine='python'
     ) if filter_pattern else dataframe
