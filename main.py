@@ -61,21 +61,22 @@ def visualizer(base_dados: pd.DataFrame):
 
     qtd_inadim_adim = base_dados['inadimplente'].value_counts()
 
+
     fig_pop_inad = px.bar(
-        base_dados,
         x=inadimplencia,
         y=populacao,
-        labels={'x': 'Inadimplencia', 'y': 'Populacao'},
+        barmode='group',
+        labels={'x': '% Inadimplência','y': '% População'},
         color_discrete_sequence=["#f17b1b"]
     )
 
     fig_adim_inadim = px.pie(
         title='<b>Porcentagem de Adimplentes e Inadimplentes</b>',
-        names=qtd_inadim_adim.index,
+        names=qtd_inadim_adim.index.map({0: 'Adimplentes', 1: 'Inadimplentes'}),
         values=qtd_inadim_adim.values,
         color_discrete_sequence=['#f17b1b'],
-        labels={'0': 'Adimplentes', '1': 'Inadimplentes'},
-        
+
+
     )
 
     st.plotly_chart(fig_pop_inad)
