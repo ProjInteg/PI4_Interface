@@ -1,19 +1,20 @@
+from typing import List
+
 import pandas as pd
 import numpy as np
 import streamlit as st
 import plotly_express as px
 import plotly.figure_factory as ff
 
-
 with open('style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
 
 @st.cache_data
-
 def load_data() -> pd.DataFrame:
     base_dados = pd.read_excel('dados_clean.xlsx')
     return base_dados
+
 
 def clause(filter_res: dict) -> str:
     clause_list = list()
@@ -22,13 +23,14 @@ def clause(filter_res: dict) -> str:
             clause_list.append(f"`{column}` in {filter_res[column]}")
 
     clause_treated = str(clause_list) \
-        .replace('", "', ' & ')[1:-1] \
+                         .replace('", "', ' & ')[1:-1] \
         .replace('[', '(') \
         .replace(']', ')')
     return clause_treated
 
+
 def set_sidebar(
-        base_dados:pd.DataFrame = None,
+        base_dados: pd.DataFrame = None,
         filtered: pd.DataFrame = None) -> dict:
     if filtered is None:
         df = base_dados
@@ -48,40 +50,39 @@ def set_sidebar(
     return filter_res
 
 
-
 def visualizer(base_dados: pd.DataFrame):
     st.header(":bar_chart: Taxa de Inadimplencia")
     st.markdown("#")
 
+    adimplentes = base_dados[base_dados['inadimplente'] == 0.0]
     inadimplentes = base_dados[base_dados['inadimplente'] == 1.0]
-
     populacao = base_dados['uf'].value_counts(normalize=True) * 100
-    inadimplencia= inadimplentes['uf'].value_counts(normalize=True) * 100
+    inadimplencia = inadimplentes['uf'].value_counts(normalize=True) * 100
 
-
-    base_by_ocup = base_dados.groupby('uf')
+    qtd_inadim_adim = base_dados['inadimplente'].value_counts()
 
     fig_pop_inad = px.bar(
         base_dados,
-        x= inadimplencia,
-        y= populacao,
-        labels={'x':'% inadimplencia', 'y': '% populacao'},
+        x=inadimplencia,
+        y=populacao,
+        labels={'x': 'Inadimplencia', 'y': 'Populacao'},
         color_discrete_sequence=["#f17b1b"]
-
     )
 
-
-
-    fig_popul_inadim = ff.create_distplot(
-        [populacao, inadimplencia],
-        group_labels=['% população', '% inadimplencia']
+    fig_adim_inadim = px.pie(
+        title='<b>Porcentagem de Adimplentes e Inadimplentes</b>',
+        names=qtd_inadim_adim.index,
+        values=qtd_inadim_adim.values,
+        color_discrete_sequence=['#f17b1b'],
+        labels={'0': 'Adimplentes', '1': 'Inadimplentes'},
+        
     )
-
-    #st.markdown(f":orange[{inadimplencia:,}]")
 
     st.plotly_chart(fig_pop_inad)
-    st.plotly_chart(fig_popul_inadim)
+    st.plotly_chart(fig_adim_inadim)
+
     st.dataframe(base_dados)
+
 
 def main(dataframe):
     filter_res = set_sidebar(base_dados=dataframe)
@@ -94,6 +95,7 @@ def main(dataframe):
     ) if filter_pattern else dataframe
 
     visualizer(base_dados=df_selection)
+
 
 FILTER_LIST = ["uf", "modalidade"]
 
