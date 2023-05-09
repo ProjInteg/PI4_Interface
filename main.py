@@ -67,14 +67,14 @@ def visualizer(base_dados: pd.DataFrame):
         y=populacao,
         barmode='group',
         labels={'x': '% Inadimplência','y': '% População'},
-        color_discrete_sequence=["#f17b1b"]
+        color_discrete_sequence=["#63340e"]
     )
 
     fig_adim_inadim = px.pie(
         title='<b>Porcentagem de Adimplentes e Inadimplentes</b>',
         names=qtd_inadim_adim.index.map({0: 'Adimplentes', 1: 'Inadimplentes'}),
         values=qtd_inadim_adim.values,
-        color_discrete_sequence=['#f17b1b'],
+        color_discrete_sequence=['#63340e'],
 
 
     )

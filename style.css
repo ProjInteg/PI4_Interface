@@ -1,8 +1,12 @@
+@charset "UTF-8";
+
 .stMarkdown {
     text-align: center;
 }
+
 #MainMenu {
     visibility: hidden;
+}
 
 footer {
     visibility: hidden;
