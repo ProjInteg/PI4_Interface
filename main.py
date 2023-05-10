@@ -6,6 +6,7 @@ import streamlit as st
 import plotly_express as px
 import plotly.figure_factory as ff
 
+
 with open('style.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
 
@@ -67,15 +68,15 @@ def visualizer(base_dados: pd.DataFrame):
         y=populacao,
         barmode='group',
         labels={'x': '% Inadimplência','y': '% População'},
-        color_discrete_sequence=["#63340e"]
+        color_discrete_sequence=["#DB5418"]
+
     )
 
     fig_adim_inadim = px.pie(
         title='<b>Porcentagem de Adimplentes e Inadimplentes</b>',
         names=qtd_inadim_adim.index.map({0: 'Adimplentes', 1: 'Inadimplentes'}),
         values=qtd_inadim_adim.values,
-        color_discrete_sequence=['#63340e'],
-
+        color_discrete_sequence=["#DB5418","#326b63"],
 
     )
 
