@@ -13,8 +13,8 @@ with open('style.css') as f:
 
 @st.cache_data
 def load_data() -> pd.DataFrame:
-    base_dados = pd.read_excel('dados_clean.xlsx')
-    return base_dados
+    bd = pd.read_excel('dados_selecionados.xlsx')
+    return bd.drop(["Unnamed: 0", "indexador"], axis=1)
 
 
 def clause(filter_res: dict) -> str:
@@ -31,10 +31,10 @@ def clause(filter_res: dict) -> str:
 
 
 def set_sidebar(
-        base_dados: pd.DataFrame = None,
+        bd: pd.DataFrame = None,
         filtered: pd.DataFrame = None) -> dict:
     if filtered is None:
-        df = base_dados
+        df = bd
     else:
         df = filtered
 
@@ -51,43 +51,66 @@ def set_sidebar(
     return filter_res
 
 
-def visualizer(base_dados: pd.DataFrame):
-    st.header(":bar_chart: Taxa de Inadimplencia")
+def visualizer(bd: pd.DataFrame):
+    st.header(":bar_chart: Análise de Inadimplência")
     st.markdown("#")
 
-    adimplentes = base_dados[base_dados['inadimplente'] == 0.0]
-    inadimplentes = base_dados[base_dados['inadimplente'] == 1.0]
-    populacao = base_dados['uf'].value_counts(normalize=True) * 100
-    inadimplencia = inadimplentes['uf'].value_counts(normalize=True) * 100
+    inadimplentes= round(bd['inadimplente'].value_counts())
 
-    qtd_inadim_adim = base_dados['inadimplente'].value_counts()
+    inadim = bd.groupby('inadimplente').get_group(1)
+    rendimento = inadim.groupby(['renda']).agg({'inadimplente': 'count'}).reset_index()
+    total_rend = round(rendimento['inadimplente'].sum())
+    percent1 = round(((rendimento['inadimplente'] / total_rend)*100),2)
+
+    ocupa = inadim.groupby(['ocupacao']).agg({'inadimplente': 'count'}).reset_index()
+    total_ocupa = round(ocupa['inadimplente'].sum())
+    percent2 = round(((ocupa['inadimplente'] / total_ocupa) * 100), 2)
+
+    renda_ocupa = inadim.groupby(['renda', 'ocupacao']).agg({'inadimplente': 'count'}).reset_index()
+    total = round(renda_ocupa['inadimplente'].sum())
+    percentual = round(((renda_ocupa['inadimplente'] / total_ocupa) * 100), 2)
+
+    categorias = {'0': 'Indisponível','1': 'Sem rendimento',
+                 '2':'Até 1 salário mínimo', '3':'1 a 2 salários mínimos',
+                 '4':'2 a 3 salários mínimos', '5':'3 a 5 salários mínimos',
+                 '6':'5 a 10 salários mínimos', '7':'10 a 20 salários mínimos',
+                 '8':'Acima de 20 salários mínimos'}
 
 
-    fig_pop_inad = px.bar(
-        x=inadimplencia,
-        y=populacao,
-        barmode='group',
-        labels={'x': '% Inadimplência','y': '% População'},
-        color_discrete_sequence=["#DB5418"]
 
-    )
+    fig_renda = px.bar(rendimento,
+                       title='Inadimplencia por Renda',
+                       x='renda',
+                       y=percent1,
+                       color_discrete_sequence=["#DB5418"],
+                       labels={'y':'% inadimplentes'},
+                       text= categorias)
 
-    fig_adim_inadim = px.pie(
-        title='<b>Porcentagem de Adimplentes e Inadimplentes</b>',
-        names=qtd_inadim_adim.index.map({0: 'Adimplentes', 1: 'Inadimplentes'}),
-        values=qtd_inadim_adim.values,
-        color_discrete_sequence=["#DB5418","#326b63"],
+    fig_ocupa = px.bar(ocupa,
+                       title='Inadimplencia por Ocupação',
+                       x='ocupacao',
+                       y=percent2,
+                       color_discrete_sequence=["#326b63"],
+                       labels={'y': '% inadimplentes', 'ocupacao':''})
 
-    )
+    fig_renda_ocupa = px.line(renda_ocupa,
+                             x='renda',
+                             y=percentual,
+                             color='ocupacao',
+                             labels={'y': '% inadimplentes'})
 
-    st.plotly_chart(fig_pop_inad)
-    st.plotly_chart(fig_adim_inadim)
 
-    st.dataframe(base_dados)
+
+    st.plotly_chart(fig_renda)
+    st.plotly_chart(fig_ocupa)
+    
+
+
+    st.dataframe(bd)
 
 
 def main(dataframe):
-    filter_res = set_sidebar(base_dados=dataframe)
+    filter_res = set_sidebar(bd=dataframe)
     # print("STATE HERE", filter_results)
     filter_pattern = clause(filter_res=filter_res)
     # print("FILTER PATTERN", filter_pattern)
@@ -96,10 +119,10 @@ def main(dataframe):
         engine='python'
     ) if filter_pattern else dataframe
 
-    visualizer(base_dados=df_selection)
+    visualizer(bd=df_selection)
 
 
 FILTER_LIST = ["uf", "modalidade"]
 
-base_dados = load_data()
-main(dataframe=base_dados)
+bd = load_data()
+main(dataframe=bd)
