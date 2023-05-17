@@ -53,9 +53,14 @@ def set_sidebar(
 
 def visualizer(bd: pd.DataFrame):
     st.header(":bar_chart: Análise de Inadimplência")
+    st.markdown("Perfil de inadimplente - Pessoas Físicas")
+    st.markdown("Baseado na base de dados do Banco Central do Brasil")
     st.markdown("#")
 
-    inadimplentes= round(bd['inadimplente'].value_counts())
+    adimplentes = bd[bd['inadimplente'] == 0.0]
+    inadimplentes = bd[bd['inadimplente'] == 1.0]
+    ad = adimplentes.value_counts(normalize=True)
+    inad = inadimplentes.count()
 
     inadim = bd.groupby('inadimplente').get_group(1)
     rendimento = inadim.groupby(['renda']).agg({'inadimplente': 'count'}).reset_index()
@@ -75,7 +80,6 @@ def visualizer(bd: pd.DataFrame):
                  '4':'2 a 3 salários mínimos', '5':'3 a 5 salários mínimos',
                  '6':'5 a 10 salários mínimos', '7':'10 a 20 salários mínimos',
                  '8':'Acima de 20 salários mínimos'}
-
 
 
     fig_renda = px.bar(rendimento,
@@ -99,14 +103,15 @@ def visualizer(bd: pd.DataFrame):
                              color='ocupacao',
                              labels={'y': '% inadimplentes'})
 
-
-
+    #st.markdown(f":orange[{inad:,}]")
     st.plotly_chart(fig_renda)
     st.plotly_chart(fig_ocupa)
 
-
-
     st.dataframe(bd)
+    st.markdown("#")
+    st.markdown("A base de dados acima, consta apenas colunas de interesse para nossa análise")
+    st.markdown("Para mais informações, a base de dados completa, está disponível em:" 
+                "https://dadosabertos.bcb.gov.br/dataset/scr_data")
 
 
 def main(dataframe):
