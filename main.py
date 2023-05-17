@@ -103,7 +103,7 @@ def visualizer(bd: pd.DataFrame):
 
     st.plotly_chart(fig_renda)
     st.plotly_chart(fig_ocupa)
-    
+
 
 
     st.dataframe(bd)
