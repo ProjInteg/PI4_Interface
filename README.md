@@ -1,6 +1,4 @@
 # Aplicativo para Visualizar dados
-Projeto em Construção.
-
 ## Descrição
 <p>O projeto visa criar uma interface para visualização
 do perfil de inadimplente no Brasil, baseado na análise de dados
